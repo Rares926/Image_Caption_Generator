@@ -3,8 +3,11 @@ from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
-from get_loader import get_loader
-from model import CNNtoRNN
+from data.data import get_loader
+from models.model import ImageCaptioningModel
+from models.utils import load_checkpoint, save_checkpoint
+from pathlib import Path
+
 
 
 def train():
@@ -18,13 +21,11 @@ def train():
     )
 
     train_loader, dataset = get_loader(
-        root_folder="flickr8k/images",
-        annotation_file="flickr8k/captions.txt",
+        Path("Z:/Master I/NLP - Foundations NLP/Image_Caption_Generator/datasets/flickr8k"),
         transform=transform,
-        num_workers=2,
+        flag = "RGB"
     )
 
-    torch.backends.cudnn.benchmark = True
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     load_model = False
     save_model = False
@@ -40,12 +41,14 @@ def train():
 
 
     # initialize model, loss etc
-    model = CNNtoRNN(embed_size, hidden_size, vocab_size, num_layers).to(device)
-    criterion = nn.CrossEntropyLoss(ignore_index=dataset.vocab.stoi["<PAD>"])
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    model = ImageCaptioningModel(embed_size, hidden_size, vocab_size, num_layers).to(device)
 
     if load_model:
         pass
+
+    loss_fn = nn.CrossEntropyLoss(ignore_index=dataset.vocab.stoi["<PAD>"])
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
 
     # Only finetune the CNN
     for name, param in model.encoderCNN.inception.named_parameters():
@@ -54,14 +57,21 @@ def train():
         else:
             param.requires_grad = train_CNN
 
+
+    # pass the model to train mode
     model.train()
 
     for _epoch in range(num_epochs):
         # Uncomment the line below to see a couple of test cases
         # print_examples(model, device, dataset)
 
-        if save_model:
-            pass
+        if _epoch == num_epochs -1:
+            if save_model:
+                checkpoint = {
+                    "state_dict": model.state_dict(),
+                    "optimizer": optimizer.state_dict()
+                }
+                save_checkpoint(checkpoint)
 
         for idx, (imgs, captions) in tqdm(
             enumerate(train_loader), total=len(train_loader), leave=False
@@ -71,7 +81,7 @@ def train():
 
             # we send the captions without the last one so that the model learn to predict it 
             outputs = model(imgs, captions[:-1])
-            loss = criterion(
+            loss = loss_fn(
                 outputs.reshape(-1, outputs.shape[2]), captions.reshape(-1)
             )
 
