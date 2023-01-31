@@ -6,15 +6,12 @@ class EncoderInception(nn.Module):
     def __init__(self, embed_size) -> None:
         super(EncoderInception,self).__init__()
         self.inception = models.inception_v3(pretrained = True)
-        # (fc): Linear(in_features=2048, out_features=1000, bias=True) old fc
-        # here we reshape the output of the model to be in concordance with our needs.
-        # self.inception.fc == nn.Linear(self.inception.fc.in_features, out_features = embed_size)
         self.linear = nn.Linear(self.inception.fc.out_features, out_features = embed_size)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.5)
 
     def forward(self,images):
-        features = self.inception(images).logits
+        features = self.inception(images)
         x = self.linear(features)
         x = self.relu(x)
         x = self.dropout(x)

@@ -53,7 +53,7 @@ class ImageCaptioningDataset(Dataset):
 
 
 def get_loader(root_folder,
-              transform,
+              transform="None",
               flag="L",
               batch_size=32,
               shuffle=True):
@@ -68,7 +68,7 @@ def get_loader(root_folder,
         shuffle (bool, optional): Wheter to shuffle or nor the data. Defaults to True.
 
     Returns:
-        (torch.utils.data.DataLoader, torch.utils.data.Dataset): Returns the dataset and the dataloader to be used for train
+        (torch.utils.data.DataLoader, torch.utils.data.Dataset): Returns the dataset and the dataloader to be used for train.
     """
     dataset = ImageCaptioningDataset(root_folder,
                                      transform = transform,
