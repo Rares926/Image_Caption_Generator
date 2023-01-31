@@ -5,10 +5,10 @@ from models.decoders import DecoderRNN
 
 
 class ImageCaptioningModel(nn.Module):
-    def __init__(self, embed_size, hidden_size, vocab_size, num_layers):
+    def __init__(self, embed_size, hidden_size, vocab_size):
         super(ImageCaptioningModel, self).__init__()
         self.encoderCNN = EncoderInception(embed_size)
-        self.decoderRNN = DecoderRNN(embed_size, hidden_size, vocab_size, num_layers)
+        self.decoderRNN = DecoderRNN(embed_size, hidden_size, vocab_size)
 
     def forward(self, images, captions):
         features = self.encoderCNN(images)

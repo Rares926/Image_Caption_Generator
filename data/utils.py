@@ -1,5 +1,5 @@
 import torch
-from torch.nn.utils.rnn import pad_sequence  
+from torch.nn.utils.rnn import pad_sequence
 import nltk
 
 class Vocabulary:

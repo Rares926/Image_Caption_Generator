@@ -13,26 +13,22 @@ def test():
 
     _, dataset = get_loader(
         Path("Z:/Master I/NLP - Foundations NLP/Image_Caption_Generator/datasets/flickr8k"),
-        flag = "RGB"
+        flag="RGB"
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
     # Hyperparameters
     embed_size = 256
     hidden_size = 256
     vocab_size = len(dataset.vocab)
     num_layers = 1
-    learning_rate = 3e-4
-
 
     # initialize model, loss etc
-    model = ImageCaptioningModel(embed_size, hidden_size, vocab_size, num_layers).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    model = ImageCaptioningModel(embed_size, hidden_size, vocab_size).to(device)
 
-    load_checkpoint(torch.load("Z:/Master I/NLP - Foundations NLP/Image_Caption_Generator/checkpoints/inception/model_checkpoint.pth.tar"),model,optimizer)
-
+    load_checkpoint("Z:/Master I/NLP - Foundations NLP/Image_Caption_Generator/checkpoints/inception/model_checkpoint.pth.tar",
+                    model)
 
     img_transform = transforms.Compose(
         [

@@ -12,7 +12,7 @@ def save_checkpoint(state, filename="model_checkpoint.pth.tar"):
     torch.save(state, filename)
 
 
-def load_checkpoint(checkpoint, model, optimizer):
+def load_checkpoint(checkpoint_path: str, model, optimizer="None"):
     """_summary_
 
     Args:
@@ -20,6 +20,10 @@ def load_checkpoint(checkpoint, model, optimizer):
         model (_type_): _description_
         optimizer (_type_): _description_
     """
-    print("=> Loading checkpoint")
+    print(10 * "=" + "Loading checkpoint")
+
+    checkpoint = torch.load(checkpoint_path)
     model.load_state_dict(checkpoint["state_dict"])
-    optimizer.load_state_dict(checkpoint["optimizer"])
+    if optimizer != "None":
+        optimizer.load_state_dict(checkpoint["optimizer"])
+    print(10 * "=" + "Checkpoint loaded model updated")

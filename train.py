@@ -9,24 +9,19 @@ from models.utils import load_checkpoint, save_checkpoint
 from pathlib import Path
 
 
-
 def train():
-    transform = transforms.Compose(
-        [
-            transforms.Resize((356, 356)),
-            transforms.RandomCrop((299, 299)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        ]
-    )
 
     train_loader, dataset = get_loader(
         Path("Z:/Master I/NLP - Foundations NLP/Image_Caption_Generator/datasets/flickr8k"),
-        transform=transform,
-        flag = "RGB"
-    )
+        transform=transforms.Compose([transforms.Resize((356, 356)),
+                                      transforms.RandomCrop((299, 299)),
+                                      transforms.ToTensor(),
+                                      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),]),
+        flag="RGB")
 
+    # - set the device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     load_model = False
     save_model = True
     train_CNN = False
@@ -35,13 +30,11 @@ def train():
     embed_size = 256
     hidden_size = 256
     vocab_size = len(dataset.vocab)
-    num_layers = 1
-    learning_rate = 3e-4
+    learning_rate = 3e-4  # as Andrej Karpathy jockingly said this is the best learning rate for Adam
     num_epochs = 100
 
-
     # initialize model, loss etc
-    model = ImageCaptioningModel(embed_size, hidden_size, vocab_size, num_layers).to(device)
+    model = ImageCaptioningModel(embed_size, hidden_size, vocab_size).to(device)
 
     if load_model:
         pass
@@ -49,14 +42,15 @@ def train():
     loss_fn = nn.CrossEntropyLoss(ignore_index=dataset.vocab.stoi["<PAD>"])
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-
     # Only finetune the CNN
-    for name, param in model.encoderCNN.inception.named_parameters():
-        if "fc.weight" in name or "fc.bias" in name:
-            param.requires_grad = True
-        else:
-            param.requires_grad = train_CNN
+    # for name, param in model.encoderCNN.inception.named_parameters():
+    #     if "fc.weight" in name or "fc.bias" in name:
+    #         param.requires_grad = True
+    #     else:
+    #         param.requires_grad = train_CNN
 
+    for name, param in model.encoderCNN.inception.named_parameters():
+        param.requires_grad = False
 
     # pass the model to train mode
     model.train()
@@ -66,10 +60,8 @@ def train():
         # print_examples(model, device, dataset)
 
         if save_model:
-            checkpoint = {
-                    "state_dict": model.state_dict(),
-                    "optimizer": optimizer.state_dict()
-                }
+            checkpoint = {"state_dict": model.state_dict(),
+                          "optimizer": optimizer.state_dict()}
             save_checkpoint(checkpoint)
 
         for idx, (imgs, captions) in tqdm(
@@ -78,7 +70,7 @@ def train():
             imgs = imgs.to(device)
             captions = captions.to(device)
 
-            # we send the captions without the last one so that the model learn to predict it 
+            # we send the captions without the last one so that the model learn to predict it
             outputs = model(imgs, captions[:-1])
             loss = loss_fn(
                 outputs.reshape(-1, outputs.shape[2]), captions.reshape(-1)
