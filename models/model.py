@@ -34,5 +34,7 @@ class ImageCaptioningModel(nn.Module):
                 if vocabulary.itos[predicted.item()] == "<END>":
                     break
 
-        # we return the string 
-        return [vocabulary.itos[idx] for idx in result_caption]
+        caption = [vocabulary.itos[idx] for idx in result_caption][1:-1]
+        sentence = " ".join(caption)
+
+        return sentence.capitalize()

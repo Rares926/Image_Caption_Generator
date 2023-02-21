@@ -1,12 +1,11 @@
 import torch
-import torch.nn as nn
-import torch.optim as optim
 import torchvision.transforms as transforms
 from data.data import get_loader
 from models.model import ImageCaptioningModel
 from models.utils import load_checkpoint
 from pathlib import Path
 from PIL import Image
+import matplotlib.pyplot as plt
 
 
 def test():
@@ -16,21 +15,24 @@ def test():
         flag="RGB"
     )
 
+    print(dataset[1])
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    print(dataset.vocab)
 
     # Hyperparameters
     embed_size = 256
     hidden_size = 256
     vocab_size = len(dataset.vocab)
-    num_layers = 1
 
     # initialize model, loss etc
     model = ImageCaptioningModel(embed_size, hidden_size, vocab_size).to(device)
 
-    load_checkpoint("Z:/Master I/NLP - Foundations NLP/Image_Caption_Generator/checkpoints/inception/model_checkpoint.pth.tar",
+    load_checkpoint("Z:/Master I/NLP - Foundations NLP/Image_Caption_Generator/checkpoints/inception/_model_checkpoint_20.pth.tar",
                     model)
 
-    img_transform = transforms.Compose(
+    test_transform = transforms.Compose(
         [
             transforms.Resize((299, 299)),
             transforms.ToTensor(),
@@ -39,8 +41,19 @@ def test():
     )
 
     model.eval()
-    test_img = img_transform(Image.open("datasets/test_data/girls.jpg").convert("RGB")).unsqueeze(0)
-    print(model.caption_image(test_img.to(device), dataset.vocab)[1:-1])
+
+    folder_path = Path("datasets/test_data")
+    img_paths = [p for p in folder_path.glob("*") if p.is_file()]
+
+    for img in img_paths:
+
+        loaded_img = Image.open(img).convert("RGB")
+        transformed_img = test_transform(loaded_img).unsqueeze(0)
+
+        plt.imshow(loaded_img)
+        plt.axis("off")
+        plt.title(model.caption_image(transformed_img.to(device), dataset.vocab))
+        plt.show()
 
 if __name__ == "__main__":
     test()

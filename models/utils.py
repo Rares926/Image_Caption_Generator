@@ -1,24 +1,24 @@
 import torch
 
-def save_checkpoint(state, filename="model_checkpoint.pth.tar"):
+def save_checkpoint(state_dict, filename="model_checkpoint.pth.tar"):
     """
     Save checkpoint containing state dict for model and optimizer
 
     Args:
-        state (Dict): Dict containing state dict of model and optimizer.
+        state_dict (Dict): Dict containing state dict of model and optimizer.
         filename (str, optional): _description_. Defaults to "my_checkpoint.pth.tar".
     """
-    print("=> Saving checkpoint")
-    torch.save(state, filename)
-
+    torch.save(state_dict, filename)
+    print(10 * "=" + ">Saved checkpoint")
 
 def load_checkpoint(checkpoint_path: str, model, optimizer="None"):
-    """_summary_
+    """
+    Loads the saved state dicts of the model and of the optimizer if necessary
 
     Args:
-        checkpoint (_type_): _description_
-        model (_type_): _description_
-        optimizer (_type_): _description_
+        checkpoint_path (str): Path to the saved checkpoint.
+        model (torch.nn.Module): Instantiated model.
+        optimizer (str or torch.optim, optional): Instantiated optimizer. Defaults to "None".
     """
     print(10 * "=" + "Loading checkpoint")
 

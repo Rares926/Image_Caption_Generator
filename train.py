@@ -23,8 +23,8 @@ def train():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     load_model = False
-    save_model = True
-    train_CNN = False
+    save_model = False
+    # train_CNN = False
 
     # Hyperparameters
     embed_size = 256
@@ -35,51 +35,42 @@ def train():
 
     # initialize model, loss etc
     model = ImageCaptioningModel(embed_size, hidden_size, vocab_size).to(device)
-
-    if load_model:
-        pass
-
-    loss_fn = nn.CrossEntropyLoss(ignore_index=dataset.vocab.stoi["<PAD>"])
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-    # Only finetune the CNN
-    # for name, param in model.encoderCNN.inception.named_parameters():
-    #     if "fc.weight" in name or "fc.bias" in name:
-    #         param.requires_grad = True
-    #     else:
-    #         param.requires_grad = train_CNN
+    if load_model:
+        load_checkpoint("Z:/Master I/NLP - Foundations NLP/Image_Caption_Generator/checkpoints/inception/model_checkpoint.pth.tar",
+                        model,
+                        optimizer)
 
-    for name, param in model.encoderCNN.inception.named_parameters():
-        param.requires_grad = False
+    loss_fn = nn.CrossEntropyLoss(ignore_index=dataset.vocab.stoi["<PAD>"])
 
     # pass the model to train mode
     model.train()
 
+    for param in model.encoderCNN.inception.parameters():
+        param.requires_grad = False
+
     for _epoch in range(num_epochs):
-        # Uncomment the line below to see a couple of test cases
-        # print_examples(model, device, dataset)
 
-        if save_model:
-            checkpoint = {"state_dict": model.state_dict(),
-                          "optimizer": optimizer.state_dict()}
-            save_checkpoint(checkpoint)
-
-        for idx, (imgs, captions) in tqdm(
-            enumerate(train_loader), total=len(train_loader), leave=False
-        ):
+        for _idx, (imgs, captions) in tqdm(enumerate(train_loader),
+                                           total=len(train_loader),
+                                           leave=False):
             imgs = imgs.to(device)
             captions = captions.to(device)
 
             # we send the captions without the last one so that the model learn to predict it
             outputs = model(imgs, captions[:-1])
-            loss = loss_fn(
-                outputs.reshape(-1, outputs.shape[2]), captions.reshape(-1)
-            )
+            loss = loss_fn(outputs.reshape(-1, outputs.shape[2]),
+                           captions.reshape(-1))
 
             optimizer.zero_grad()
             loss.backward(loss)
             optimizer.step()
 
+        if save_model:
+            checkpoint = {"state_dict": model.state_dict(),
+                          "optimizer": optimizer.state_dict()}
+            save_checkpoint(checkpoint)
 
 if __name__ == "__main__":
     train()

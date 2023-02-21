@@ -3,13 +3,13 @@ from torch.nn.utils.rnn import pad_sequence
 import nltk
 
 class Vocabulary:
-    def __init__(self, freq_threshold:int):
+    def __init__(self, freq_threshold: int):
 
         self.itos = {0: "<PAD>", 1: "<START>", 2: "<END>", 3: "<UNK>"}
         self.stoi = {"<PAD>": 0, "<START>": 1, "<END>": 2, "<UNK>": 3}
 
         self.freq_threshold = freq_threshold
-        
+
     def __len__(self):
         return len(self.itos)
 

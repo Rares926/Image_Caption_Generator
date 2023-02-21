@@ -1,7 +1,7 @@
-import pandas as pd  
+import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
-from PIL import Image  
+from PIL import Image
 from data.utils import Vocabulary, MyCollate
 import torchvision.transforms as transforms
 from pathlib import Path
@@ -11,18 +11,14 @@ class ImageCaptioningDataset(Dataset):
     def __init__(self,
                  dataset_dir: Path,
                  transform=None,
-                 freq_threshold: int=5,
-                 flag: str="RGB"):
+                 freq_threshold: int = 5,
+                 flag: str = "RGB"):
 
-        self.root_dir = dataset_dir/"images"
-        self.df = pd.read_csv(dataset_dir/"captions.txt")
+        self.img_dir = dataset_dir / "images"
+        self.df = pd.read_csv(dataset_dir / "captions.txt")
         self.transform = transform
         self.flag = flag
-
-        # Get img, caption columns
-        self.imgs,self.captions = self.df["image"],self.df["caption"]
-
-        # Initialize vocabulary and build vocab
+        self.imgs, self.captions = self.df["image"], self.df["caption"]
         self.vocab = Vocabulary(freq_threshold)
         self.vocab.build_vocab(self.captions.tolist())
 
@@ -30,17 +26,9 @@ class ImageCaptioningDataset(Dataset):
         return len(self.df)
 
     def __getitem__(self, index):
-        """_summary_
-
-        Args:
-            index (_type_): _description_
-
-        Returns:
-            _type_: _description_
-        """
         caption = self.captions[index]
         img_id = self.imgs[index]
-        img = Image.open(self.root_dir/str(img_id)).convert(self.flag)
+        img = Image.open(self.img_dir / str(img_id)).convert(self.flag)
 
         if self.transform is not None:
             img = self.transform(img)
@@ -53,12 +41,12 @@ class ImageCaptioningDataset(Dataset):
 
 
 def get_loader(root_folder,
-              transform="None",
-              flag="L",
-              batch_size=32,
-              shuffle=True):
+               transform=None,
+               flag="L",
+               batch_size=32,
+               shuffle=True):
     """
-    Method for generating thed Dataset and Dataloader objects needed.
+    Method for generating the Dataset and Dataloader objects needed.
 
     Args:
         root_folder (Path): Path to the root folder of the dataset
@@ -71,8 +59,8 @@ def get_loader(root_folder,
         (torch.utils.data.DataLoader, torch.utils.data.Dataset): Returns the dataset and the dataloader to be used for train.
     """
     dataset = ImageCaptioningDataset(root_folder,
-                                     transform = transform,
-                                     flag = flag)
+                                     transform=transform,
+                                     flag=flag)
 
     loader = DataLoader(
         dataset=dataset,
@@ -82,5 +70,3 @@ def get_loader(root_folder,
     )
 
     return loader, dataset
-
-

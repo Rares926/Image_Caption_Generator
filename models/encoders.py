@@ -11,7 +11,8 @@ class EncoderInception(nn.Module):
         self.dropout = nn.Dropout(0.5)
 
     def forward(self, images):
-        features = self.inception(images)
+        # features = self.inception(images).logits # for train
+        features = self.inception(images)   # for test
         x = self.linear(features)
         x = self.relu(x)
         x = self.dropout(x)
