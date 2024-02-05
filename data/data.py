@@ -3,7 +3,6 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from PIL import Image
 from data.utils import Vocabulary, MyCollate
-import torchvision.transforms as transforms
 from pathlib import Path
 
 
@@ -50,13 +49,16 @@ def get_loader(root_folder,
 
     Args:
         root_folder (Path): Path to the root folder of the dataset
-        transform ("None" or torchvision.transforms): Transforms to be applied on the images.
+        transform ("None" or torchvision.transforms): Transforms to
+            be applied on the images.
         flag (str, optional): How to load the images. Defaults to L.
         batch_size (int, optional):Defaults to 32.
-        shuffle (bool, optional): Wheter to shuffle or nor the data. Defaults to True.
+        shuffle (bool, optional): Wheter to shuffle or nor the data.
+            Defaults to True.
 
     Returns:
-        (torch.utils.data.DataLoader, torch.utils.data.Dataset): Returns the dataset and the dataloader to be used for train.
+        (torch.utils.data.DataLoader, torch.utils.data.Dataset): Returns
+            the dataset and the dataloader to be used for train.
     """
     dataset = ImageCaptioningDataset(root_folder,
                                      transform=transform,

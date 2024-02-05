@@ -1,13 +1,23 @@
 import torch
 import torch.nn as nn
-from models.encoders import EncoderInception, EncoderVGG
+from models.encoders import EncoderInception, EncoderVGG, EncoderResNet, EncoderViT # noqa
 from models.decoders import DecoderRNN
 
 
 class ImageCaptioningModel(nn.Module):
-    def __init__(self, embed_size, hidden_size, vocab_size):
+    def __init__(
+            self, embed_size, hidden_size, vocab_size, encoder_name="inception"
+            ):
         super(ImageCaptioningModel, self).__init__()
-        self.encoderCNN = EncoderInception(embed_size)
+
+        encoder_name_dict = {
+            "inception": EncoderInception(embed_size),
+            "vgg": EncoderVGG(embed_size),
+            "res_net": EncoderResNet(embed_size),
+            "vit": EncoderViT(embed_size),
+        }
+
+        self.encoderCNN = encoder_name_dict[encoder_name]
         self.decoderRNN = DecoderRNN(embed_size, hidden_size, vocab_size)
 
     def forward(self, images, captions):

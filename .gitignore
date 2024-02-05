@@ -2,7 +2,13 @@
 *.py[cod]
 
 datasets/
+datsets/
+
 junk/
 
-checkpoints/inception/
-checkpoints/vgg/
+checkpoints/
+checkpoints/
+
+**/__pycache__/
+__pycache__/
+*.pyc

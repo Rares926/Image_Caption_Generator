@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 def test():
 
     _, dataset = get_loader(
-        Path("Z:/Master I/NLP - Foundations NLP/Image_Caption_Generator/datasets/flickr8k"),
+        Path("datsets/flickr8k"),
         flag="RGB"
     )
 
@@ -27,9 +27,11 @@ def test():
     vocab_size = len(dataset.vocab)
 
     # initialize model, loss etc
-    model = ImageCaptioningModel(embed_size, hidden_size, vocab_size).to(device)
+    model = ImageCaptioningModel(
+        embed_size, hidden_size, vocab_size, encoder_name="inception"
+        ).to(device)
 
-    load_checkpoint("Z:/Master I/NLP - Foundations NLP/Image_Caption_Generator/checkpoints/inception/_model_checkpoint_20.pth.tar",
+    load_checkpoint("checkpoints/inception/lstm/model_checkpoint_20.pth.tar",
                     model)
 
     test_transform = transforms.Compose(
@@ -42,7 +44,7 @@ def test():
 
     model.eval()
 
-    folder_path = Path("datasets/test_data")
+    folder_path = Path("datsets/test_data")
     img_paths = [p for p in folder_path.glob("*") if p.is_file()]
 
     for img in img_paths:
@@ -52,8 +54,14 @@ def test():
 
         plt.imshow(loaded_img)
         plt.axis("off")
-        plt.title(model.caption_image(transformed_img.to(device), dataset.vocab))
+        plt.title(
+            model.caption_image(
+                transformed_img.to(device),
+                dataset.vocab
+                )
+            )
         plt.show()
+
 
 if __name__ == "__main__":
     test()
